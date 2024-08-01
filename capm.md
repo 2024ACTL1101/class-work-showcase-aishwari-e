@@ -81,7 +81,11 @@ $$
 $$
 
 ```r
-#fill the code
+# Calculate daily returns for AMD and S&P 500
+df <- df %>%
+  mutate(AMD_Return = (AMD / lag(AMD) - 1),
+         GSPC_Return = (GSPC / lag(GSPC) - 1)) %>%
+  na.omit()
 ```
 
 - **Calculate Risk-Free Rate**: Calculate the daily risk-free rate by conversion of annual risk-free Rate. This conversion accounts for the compounding effect over the days of the year and is calculated using the formula:
@@ -91,21 +95,29 @@ $$
 $$
 
 ```r
-#fill the code
+# Convert annual risk-free rate to daily risk-free rate
+df <- df %>%
+  mutate(RF_Daily = (1 + RF / 100)^(1 / 360) - 1)
+
 ```
 
 
 - **Calculate Excess Returns**: Compute the excess returns for AMD and the S&P 500 by subtracting the daily risk-free rate from their respective returns.
 
 ```r
-#fill the code
+# Calculate excess returns
+df <- df %>%
+  mutate(AMD_Excess = AMD_Return - RF_Daily,
+         GSPC_Excess = GSPC_Return - RF_Daily)
 ```
 
 
 - **Perform Regression Analysis**: Using linear regression, we estimate the beta (\(\beta\)) of AMD relative to the S&P 500. Here, the dependent variable is the excess return of AMD, and the independent variable is the excess return of the S&P 500. Beta measures the sensitivity of the stock's returns to fluctuations in the market.
 
 ```r
-#fill the code
+# Perform linear regression to estimate beta
+capm_model <- lm(AMD_Excess ~ GSPC_Excess, data = df)
+summary(capm_model)
 ```
 
 
@@ -120,7 +132,14 @@ What is your \(\beta\)? Is AMD more volatile or less volatile than the market?
 Plot the scatter plot of AMD vs. S&P 500 excess returns and add the CAPM regression line.
 
 ```r
-#fill the code
+# Plot the scatter plot with regression line
+ggplot(df, aes(x = GSPC_Excess, y = AMD_Excess)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "CAPM: AMD vs. S&P 500 Excess Returns",
+       x = "S&P 500 Excess Return",
+       y = "AMD Excess Return") +
+  theme_minimal()
 ```
 
 ### Step 3: Predictions Interval
@@ -131,5 +150,26 @@ Suppose the current risk-free rate is 5.0%, and the annual expected return for t
 **Answer:**
 
 ```r
-#fill the code
+# Extract the standard error of the regression
+s_f <- summary(capm_model)$sigma
+
+# Calculate annual standard error for prediction
+annual_s_f <- s_f * sqrt(252)
+
+# Given values
+current_rf <- 0.05
+expected_market_return <- 0.133
+
+# Calculate expected AMD return using CAPM
+expected_amd_return <- current_rf + capm_model$coefficients[2] * (expected_market_return - current_rf)
+
+# Calculate 90% prediction interval
+t_value <- qt(0.95, df = nrow(df) - 2)
+prediction_interval <- c(expected_amd_return - t_value * annual_s_f,
+                         expected_amd_return + t_value * annual_s_f)
+
+# Output the prediction interval
+prediction_interval
 ```
+
+The 90% prediction interval for amd's annual expected return is -0.4904574 to 0.8510772.
