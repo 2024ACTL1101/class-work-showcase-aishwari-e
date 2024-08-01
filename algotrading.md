@@ -106,7 +106,7 @@ for (i in 1:nrow(amd_df)) {
 
 ### Step 3: Customize Trading Period
 - Define a trading period you wanted in the past five years 
-```{r period}
+```r 
 # Define dates
 start_date <- as.Date('2023-03-07')  
 end_date <- as.Date('2024-03-07')    
@@ -166,7 +166,7 @@ After running your algorithm, check if the trades were executed as expected. Cal
 - Invested Capital: Calculate the total capital invested. This is equal to the sum of the 'costs_proceeds' values for all 'buy' transactions. Since these entries are negative (representing money spent), you should take the negative sum of these values to reflect the total amount invested.
 - ROI Formula: $$\text{ROI} = \left( \frac{\text{Total Profit or Loss}}{\text{Total Capital Invested}} \right) \times 100$$
 
-```{r}
+```r
 # sum all cost proceeds to calculate the total profit or loss
 profit_loss <- sum(amd_df$costs_proceeds, na.rm = TRUE)
 
@@ -187,7 +187,7 @@ cat("ROI:", roi, "%\n")
 - Option 2: Implement a stop-loss mechanism in the trading strategy that you sell half of your holdings if the stock falls by a certain percentage (e.g., 20%) from the average purchase price. You don't need to buy 100 stocks on the days that the stop-loss mechanism is triggered.
 
 
-```{r option}
+```r 
 # Option 1
 # Initialize columns for trade type, cost/proceeds, and accumulated shares in amd_df
 amd_df$trade_type <- NA
